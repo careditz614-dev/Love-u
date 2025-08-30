@@ -1,0 +1,619 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Surprise</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #ffe6f0;
+      overflow: hidden;
+      text-align: center;
+    }
+    .slide {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: transform 0.6s ease-in-out;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .active {
+      display: flex;
+    }
+    button {
+      margin-top: 20px;
+      padding: 15px 35px;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(255, 120, 180, 0.7);
+      animation: heartbeat 1.2s infinite;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(255, 90, 150, 0.9);
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.1); }
+      50% { transform: scale(0.95); }
+      75% { transform: scale(1.1); }
+    }
+
+    /* Floating hearts */
+    .hearts {
+      position: absolute;
+      font-size: 2em;
+      animation: float 6s infinite ease-in;
+      opacity: 0.7;
+    }
+    .hearts:nth-child(2) { left: 20%; animation-delay: 1s; }
+    .hearts:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .hearts:nth-child(4) { left: 60%; animation-delay: 3s; }
+    .hearts:nth-child(5) { left: 80%; animation-delay: 4s; }
+
+    @keyframes float {
+      0% { bottom: -10%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { bottom: 110%; opacity: 0; }
+    }
+
+    img {
+      max-width: 250px;
+      border-radius: 20px;
+      margin-top: 15px;
+    }
+
+    /* Memory game */
+    .game {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #ffb6c1;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      cursor: pointer;
+    }
+    #finalMessage {
+      font-size: 2.5em;
+      color: #ff4081;
+      text-shadow: 0 0 20px pink;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 1 -->
+  <div id="slide1" class="slide active" style="background: linear-gradient(135deg, #ffdde1, #ffe4f2); position: relative; overflow: hidden;">
+    <h1 style="font-size: 2.5em; color: #ff4d88; text-shadow: 0 0 15px #ff99cc;">💖 Welcome My Love 💖</h1>
+    <button onclick="goToSlide2()">✨ Tap to Begin ✨</button>
+
+    <!-- Floating hearts -->
+    <div class="hearts">❤️</div>
+    <div class="hearts">💖</div>
+    <div class="hearts">💕</div>
+    <div class="hearts">💓</div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div id="slide2" class="slide">
+    <h1>Hii bbg ♥️</h1>
+    <img src="https://i.ibb.co/5G0GdYh/cute-bear-hug.gif" alt="cute hug gif">
+  </div>
+
+  <!-- Slide 3 -->
+  <div id="slide3" class="slide">
+    <h1>I have something for you ♥️</h1>
+    <img src="https://i.ibb.co/8KnVt4m/cute-love.gif" alt="cute love gif">
+  </div>
+
+  <!-- Slide 4 (Game) -->
+  <div id="slide4" class="slide">
+    <h1>💝 Memory Game 💝</h1>
+    <div class="game" id="gameBoard"></div>
+    <h2 id="finalMessage">🎉 I Love You Forever 💖</h2>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+
+    function showSlide(n) {
+      document.getElementById("slide" + currentSlide).classList.remove("active");
+      currentSlide = n;
+      document.getElementById("slide" + currentSlide).classList.add("active");
+    }
+
+    function goToSlide2() {
+      showSlide(2);
+      setTimeout(() => showSlide(3), 2500);
+      setTimeout(() => showSlide(4), 5000);
+    }
+
+    // Memory Game
+    const cardsArray = ["❤️","💖","💕","💓","❤️","💖","💕","💓"];
+    let gameBoard = document.getElementById("gameBoard");
+    let firstCard = null, secondCard = null, matched = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startGame() {
+      gameBoard.innerHTML = "";
+      shuffle(cardsArray).forEach(symbol => {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.symbol = symbol;
+        card.innerText = "❓";
+        card.onclick = () => flipCard(card);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (card.innerText !== "❓" || secondCard) return;
+      card.innerText = card.dataset.symbol;
+
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+          firstCard = null;
+          secondCard = null;
+          matched += 2;
+          if (matched === cardsArray.length) {
+            document.getElementById("finalMessage").style.display = "block";
+          }
+        } else {
+          setTimeout(() => {
+            firstCard.innerText = "❓";
+            secondCard.innerText = "❓";
+            firstCard = null;
+            secondCard = null;
+          }, 800);
+        }
+      }
+    }
+
+    startGame();
+  </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Surprise</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #ffe6f0;
+      overflow: hidden;
+      text-align: center;
+    }
+    .slide {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: transform 0.6s ease-in-out;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .active {
+      display: flex;
+    }
+    button {
+      margin-top: 20px;
+      padding: 15px 35px;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(255, 120, 180, 0.7);
+      animation: heartbeat 1.2s infinite;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(255, 90, 150, 0.9);
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.1); }
+      50% { transform: scale(0.95); }
+      75% { transform: scale(1.1); }
+    }
+
+    /* Floating hearts */
+    .hearts {
+      position: absolute;
+      font-size: 2em;
+      animation: float 6s infinite ease-in;
+      opacity: 0.7;
+    }
+    .hearts:nth-child(2) { left: 20%; animation-delay: 1s; }
+    .hearts:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .hearts:nth-child(4) { left: 60%; animation-delay: 3s; }
+    .hearts:nth-child(5) { left: 80%; animation-delay: 4s; }
+
+    @keyframes float {
+      0% { bottom: -10%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { bottom: 110%; opacity: 0; }
+    }
+
+    img {
+      max-width: 250px;
+      border-radius: 20px;
+      margin-top: 15px;
+    }
+
+    /* Memory game */
+    .game {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #ffb6c1;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      cursor: pointer;
+    }
+    #finalMessage {
+      font-size: 2.5em;
+      color: #ff4081;
+      text-shadow: 0 0 20px pink;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 1 -->
+  <div id="slide1" class="slide active" style="background: linear-gradient(135deg, #ffdde1, #ffe4f2); position: relative; overflow: hidden;">
+    <h1 style="font-size: 2.5em; color: #ff4d88; text-shadow: 0 0 15px #ff99cc;">💖 Welcome My Love 💖</h1>
+    <button onclick="goToSlide2()">✨ Tap to Begin ✨</button>
+
+    <!-- Floating hearts -->
+    <div class="hearts">❤️</div>
+    <div class="hearts">💖</div>
+    <div class="hearts">💕</div>
+    <div class="hearts">💓</div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div id="slide2" class="slide">
+    <h1>Hii bbg ♥️</h1>
+    <img src="https://i.ibb.co/5G0GdYh/cute-bear-hug.gif" alt="cute hug gif">
+  </div>
+
+  <!-- Slide 3 -->
+  <div id="slide3" class="slide">
+    <h1>I have something for you ♥️</h1>
+    <img src="https://i.ibb.co/8KnVt4m/cute-love.gif" alt="cute love gif">
+  </div>
+
+  <!-- Slide 4 (Game) -->
+  <div id="slide4" class="slide">
+    <h1>💝 Memory Game 💝</h1>
+    <div class="game" id="gameBoard"></div>
+    <h2 id="finalMessage">🎉 I Love You Forever 💖</h2>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+
+    function showSlide(n) {
+      document.getElementById("slide" + currentSlide).classList.remove("active");
+      currentSlide = n;
+      document.getElementById("slide" + currentSlide).classList.add("active");
+    }
+
+    function goToSlide2() {
+      showSlide(2);
+      setTimeout(() => showSlide(3), 2500);
+      setTimeout(() => showSlide(4), 5000);
+    }
+
+    // Memory Game
+    const cardsArray = ["❤️","💖","💕","💓","❤️","💖","💕","💓"];
+    let gameBoard = document.getElementById("gameBoard");
+    let firstCard = null, secondCard = null, matched = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startGame() {
+      gameBoard.innerHTML = "";
+      shuffle(cardsArray).forEach(symbol => {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.symbol = symbol;
+        card.innerText = "❓";
+        card.onclick = () => flipCard(card);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (card.innerText !== "❓" || secondCard) return;
+      card.innerText = card.dataset.symbol;
+
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+          firstCard = null;
+          secondCard = null;
+          matched += 2;
+          if (matched === cardsArray.length) {
+            document.getElementById("finalMessage").style.display = "block";
+          }
+        } else {
+          setTimeout(() => {
+            firstCard.innerText = "❓";
+            secondCard.innerText = "❓";
+            firstCard = null;
+            secondCard = null;
+          }, 800);
+        }
+      }
+    }
+
+    startGame();
+  </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Surprise</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #ffe6f0;
+      overflow: hidden;
+      text-align: center;
+    }
+    .slide {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: transform 0.6s ease-in-out;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .active {
+      display: flex;
+    }
+    button {
+      margin-top: 20px;
+      padding: 15px 35px;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(255, 120, 180, 0.7);
+      animation: heartbeat 1.2s infinite;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(255, 90, 150, 0.9);
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.1); }
+      50% { transform: scale(0.95); }
+      75% { transform: scale(1.1); }
+    }
+
+    /* Floating hearts */
+    .hearts {
+      position: absolute;
+      font-size: 2em;
+      animation: float 6s infinite ease-in;
+      opacity: 0.7;
+    }
+    .hearts:nth-child(2) { left: 20%; animation-delay: 1s; }
+    .hearts:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .hearts:nth-child(4) { left: 60%; animation-delay: 3s; }
+    .hearts:nth-child(5) { left: 80%; animation-delay: 4s; }
+
+    @keyframes float {
+      0% { bottom: -10%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { bottom: 110%; opacity: 0; }
+    }
+
+    img {
+      max-width: 250px;
+      border-radius: 20px;
+      margin-top: 15px;
+    }
+
+    /* Memory game */
+    .game {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #ffb6c1;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      cursor: pointer;
+    }
+    #finalMessage {
+      font-size: 2.5em;
+      color: #ff4081;
+      text-shadow: 0 0 20px pink;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 1 -->
+  <div id="slide1" class="slide active" style="background: linear-gradient(135deg, #ffdde1, #ffe4f2); position: relative; overflow: hidden;">
+    <h1 style="font-size: 2.5em; color: #ff4d88; text-shadow: 0 0 15px #ff99cc;">💖 Welcome My Love 💖</h1>
+    <button onclick="goToSlide2()">✨ Tap to Begin ✨</button>
+
+    <!-- Floating hearts -->
+    <div class="hearts">❤️</div>
+    <div class="hearts">💖</div>
+    <div class="hearts">💕</div>
+    <div class="hearts">💓</div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div id="slide2" class="slide">
+    <h1>Hii bbg ♥️</h1>
+    <img src="https://i.ibb.co/5G0GdYh/cute-bear-hug.gif" alt="cute hug gif">
+  </div>
+
+  <!-- Slide 3 -->
+  <div id="slide3" class="slide">
+    <h1>I have something for you ♥️</h1>
+    <img src="https://i.ibb.co/8KnVt4m/cute-love.gif" alt="cute love gif">
+  </div>
+
+  <!-- Slide 4 (Game) -->
+  <div id="slide4" class="slide">
+    <h1>💝 Memory Game 💝</h1>
+    <div class="game" id="gameBoard"></div>
+    <h2 id="finalMessage">🎉 I Love You Forever 💖</h2>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+
+    function showSlide(n) {
+      document.getElementById("slide" + currentSlide).classList.remove("active");
+      currentSlide = n;
+      document.getElementById("slide" + currentSlide).classList.add("active");
+    }
+
+    function goToSlide2() {
+      showSlide(2);
+      setTimeout(() => showSlide(3), 2500);
+      setTimeout(() => showSlide(4), 5000);
+    }
+
+    // Memory Game
+    const cardsArray = ["❤️","💖","💕","💓","❤️","💖","💕","💓"];
+    let gameBoard = document.getElementById("gameBoard");
+    let firstCard = null, secondCard = null, matched = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startGame() {
+      gameBoard.innerHTML = "";
+      shuffle(cardsArray).forEach(symbol => {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.symbol = symbol;
+        card.innerText = "❓";
+        card.onclick = () => flipCard(card);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (card.innerText !== "❓" || secondCard) return;
+      card.innerText = card.dataset.symbol;
+
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
+          firstCard = null;
+          secondCard = null;
+          matched += 2;
+          if (matched === cardsArray.length) {
+            document.getElementById("finalMessage").style.display = "block";
+          }
+        } else {
+          setTimeout(() => {
+            firstCard.innerText = "❓";
+            secondCard.innerText = "❓";
+            firstCard = null;
+            secondCard = null;
+          }, 800);
+        }
+      }
+    }
+
+    startGame();
+  </script>
+
+</body>
+</html>
